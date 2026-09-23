@@ -253,7 +253,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
       Sync Now
     </button>
-    <button class="upload-btn" style="background:#1a6b3c;" onclick="window.open('https://docs.google.com/spreadsheets/d/1BoDmJBzzS9yNvOJTJutgU8yq4O7RvOL16kNG19eHO34/edit?gid=314312705#gid=314312705','_blank')">
+    <button class="upload-btn" style="background:#1a6b3c;" onclick="window.open('https://docs.google.com/spreadsheets/d/1vd1_nuV18StUDGghhCKRooowl8Hom8VvrC8O1fdQ1XQ/edit?gid=314312705#gid=314312705','_blank')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Open Sheet
     </button>
@@ -281,6 +281,17 @@
     <div class="filter-divider"></div>
     <span class="filter-group-label">AREA</span>
     <select class="filter-select" id="areaFilter" onchange="applyFilters()"><option value="All">All Areas</option></select>
+    <div class="filter-divider"></div>
+    <span class="filter-group-label">SERVICES</span>
+    <select class="filter-select" id="servicesFilter" onchange="applyFilters()">
+      <option value="All">All Services</option>
+      <option value="MEPF">MEPF</option>
+      <option value="HVAC">HVAC</option>
+      <option value="ELE">ELE</option>
+      <option value="PHE">PHE</option>
+      <option value="FFTG">FFTG</option>
+      <option value="ELV">ELV</option>
+    </select>
     <div class="filter-divider"></div>
     <span class="filter-group-label">TRANSMITTAL</span>
     <select class="filter-select" id="txFilter" onchange="applyFilters()"><option value="All">All Transmittals</option></select>
@@ -358,7 +369,7 @@
           <th onclick="sortTable('area')">FLOOR/AREA</th>
           <th onclick="sortTable('date')">DWG DATE</th>
           <th onclick="sortTable('dwgno')">DWG NUMBER</th>
-          <th>ACPL TX</th><th>DISCIPLINE</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>R8</th><th>R9</th><th>R10</th>
+          <th>ACPL TX</th><th>SERVICES</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>R8</th><th>R9</th><th>R10</th>
           <th>SOFT COPY</th>
           <th onclick="sortTable('status')">STATUS</th>
         </tr></thead>
@@ -389,9 +400,9 @@ function loadFromSheet(btn){const tb=document.getElementById('tableBody');if(btn
 function showSync(msg,err){const el=document.getElementById('syncStatus');el.style.display='inline-block';el.textContent=msg;el.style.borderColor=err?'var(--red)':'var(--green)';el.style.color=err?'var(--red)':'var(--green)';}
 function handleFileUpload(ev){const file=ev.target.files[0];if(!file)return;const isXls=file.name.match(/\.xlsx?$/i);const reader=new FileReader();reader.onload=function(e){try{let d=[];if(isXls){const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});let sn=wb.SheetNames[0];for(const s of wb.SheetNames){if(XLSX.utils.sheet_to_csv(wb.Sheets[s]).toLowerCase().includes('sl no')){sn=s;break;}}d=parseCSV(XLSX.utils.sheet_to_csv(wb.Sheets[sn]));}else{d=parseCSV(e.target.result);}if(!d.length){alert('No data found.');return;}allDrawings=d;updateArea();updateTx();applyFilters();const now=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});document.getElementById('lastUpdate').textContent='Last update: '+now+' ('+file.name+')';showSync('\ud83d\udcc1 File loaded',false);document.getElementById('fileInput').value='';}catch(err){alert('Error: '+err.message);}};isXls?reader.readAsBinaryString(file):reader.readAsText(file);}
 function toggleFilter(el,type){const val=el.dataset.value;if(type==='cat')catFilter=val;else if(type==='status')statusFilter=val;else revFilter=val;document.querySelectorAll(`[data-filter="${type}"]`).forEach(b=>b.classList.remove('active','active-green','active-red'));if(val==='Updated')el.classList.add('active-green');else if(val==='Void')el.classList.add('active-red');else el.classList.add('active');applyFilters();}
-function resetFilters(){catFilter='All';statusFilter='All';revFilter='All';areaFilter='All';txFilter='All';searchQuery='';document.getElementById('searchInput').value='';document.getElementById('areaFilter').value='All';document.getElementById('txFilter').value='All';document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active','active-green','active-red'));document.querySelectorAll('[data-value="All"]').forEach(b=>b.classList.add('active'));applyFilters();}
+function resetFilters(){catFilter='All';statusFilter='All';revFilter='All';areaFilter='All';txFilter='All';searchQuery='';document.getElementById('searchInput').value='';document.getElementById('areaFilter').value='All';document.getElementById('txFilter').value='All';if(document.getElementById('servicesFilter'))document.getElementById('servicesFilter').value='All';document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active','active-green','active-red'));document.querySelectorAll('[data-value="All"]').forEach(b=>b.classList.add('active'));applyFilters();}
 function getFiltered(){areaFilter=document.getElementById('areaFilter').value;
-txFilter=document.getElementById('txFilter')?document.getElementById('txFilter').value:'All';searchQuery=document.getElementById('searchInput').value.trim().toLowerCase();return allDrawings.filter(d=>{if(catFilter!=='All'&&d.cat!==catFilter)return false;if(statusFilter!=='All'&&d.status!==statusFilter)return false;if(areaFilter!=='All'&&d.area!==areaFilter)return false;if(txFilter!=='All'&&d.acplTx!==txFilter)return false;if(revFilter!=='All'){if(revFilter==='R0'&&!d.r0)return false;if(revFilter==='R1'&&!d.r1)return false;if(revFilter==='R2'&&!d.r2)return false;if(revFilter==='R3'&&!d.r3)return false;if(revFilter==='R4'&&!d.r4)return false;if(revFilter==='R5'&&!d.r5)return false;if(revFilter==='R6'&&!d.r6)return false;if(revFilter==='R7'&&!d.r7)return false;if(revFilter==='R8'&&!d.r8)return false;if(revFilter==='R9'&&!d.r9)return false;if(revFilter==='R10'&&!d.r10)return false;}if(searchQuery){const q=searchQuery;if(!d.name.toLowerCase().includes(q)&&!d.dwgno.toLowerCase().includes(q)&&!d.area.toLowerCase().includes(q)&&!d.cat.toLowerCase().includes(q)&&!(d.acplTx||'').toLowerCase().includes(q))return false;}return true;});}
+txFilter=document.getElementById('txFilter')?document.getElementById('txFilter').value:'All';searchQuery=document.getElementById('searchInput').value.trim().toLowerCase();const svcFilter=document.getElementById('servicesFilter')?document.getElementById('servicesFilter').value:'All';return allDrawings.filter(d=>{if(catFilter!=='All'&&d.cat!==catFilter)return false;if(svcFilter!=='All'&&(d.discipline||'').trim().toUpperCase()!==svcFilter)return false;if(statusFilter!=='All'&&d.status!==statusFilter)return false;if(areaFilter!=='All'&&d.area!==areaFilter)return false;if(txFilter!=='All'&&d.acplTx!==txFilter)return false;if(revFilter!=='All'){if(revFilter==='R0'&&!d.r0)return false;if(revFilter==='R1'&&!d.r1)return false;if(revFilter==='R2'&&!d.r2)return false;if(revFilter==='R3'&&!d.r3)return false;if(revFilter==='R4'&&!d.r4)return false;if(revFilter==='R5'&&!d.r5)return false;if(revFilter==='R6'&&!d.r6)return false;if(revFilter==='R7'&&!d.r7)return false;if(revFilter==='R8'&&!d.r8)return false;if(revFilter==='R9'&&!d.r9)return false;if(revFilter==='R10'&&!d.r10)return false;}if(searchQuery){const q=searchQuery;if(!d.name.toLowerCase().includes(q)&&!d.dwgno.toLowerCase().includes(q)&&!d.area.toLowerCase().includes(q)&&!d.cat.toLowerCase().includes(q)&&!(d.discipline||'').toLowerCase().includes(q)&&!(d.acplTx||'').toLowerCase().includes(q))return false;}return true;});}
 function sortTable(key){if(sortKey===key)sortAsc=!sortAsc;else{sortKey=key;sortAsc=true;}applyFilters();}
 function applyFilters(){const data=getFiltered();const sorted=[...data].sort((a,b)=>{if(sortKey==='sl')return sortAsc?a.sl-b.sl:b.sl-a.sl;const va=a[sortKey]||'',vb=b[sortKey]||'';return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));});renderTable(sorted);renderKPIs(data);renderCharts(data);renderSoftCopy(data);document.getElementById('resultCount').textContent=data.length;document.getElementById('tableCountLabel').textContent='('+sorted.length+' rows)';}
 function catBadge(c){if(c==='GFC')return'<span class="cat-badge cat-gfc">GFC</span>';if(c==='Advance Copy')return'<span class="cat-badge cat-adv">Advance Copy</span>';return'<span class="cat-badge cat-info">For Info.</span>';}
